@@ -61,7 +61,9 @@ Or as a skill inside a session:
 
 ### Always-on via CLAUDE.md (recommended)
 
-Add a section to `~/.claude/CLAUDE.md` instructing Claude to read `~/.claude/fable-emulation-prompt.md` at session start. This applies the discipline to every session — including Fable itself: the instruction set originates from the official Fable 5 prompting guide, so making it explicit stabilizes Fable's own behavior too. Also include the key rules in subagent prompts when delegating quality-critical work to Sonnet-class models.
+`install.sh` appends a section to `~/.claude/CLAUDE.md` (skipped if already present) instructing Claude to read `~/.claude/fable-emulation-prompt.md` at session start. This applies the discipline to every session — including Fable itself: the instruction set originates from the official Fable 5 prompting guide, so making it explicit stabilizes Fable's own behavior too. Also include the key rules in subagent prompts when delegating quality-critical work to Sonnet-class models.
+
+**Note**: with the CLAUDE.md section in place, the `claude-fable` launcher becomes redundant (the discipline would be applied twice — harmless, but unnecessary). Keep the launcher for machines where you skip the CLAUDE.md integration, or for one-off use without touching global config.
 
 ### Codex CLI
 

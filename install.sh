@@ -36,6 +36,23 @@ if $DO_CLAUDE; then
     *) echo "  NOTE: ~/.local/bin is not on PATH in this shell. Add it to your rc file:"
        echo '        export PATH="$HOME/.local/bin:$PATH"' ;;
   esac
+
+  # Idempotent CLAUDE.md section injection (always-on discipline)
+  CLAUDE_MD="$HOME/.claude/CLAUDE.md"
+  if [ -f "$CLAUDE_MD" ] && grep -qF 'Fable-class behavioral discipline' "$CLAUDE_MD"; then
+    echo "  CLAUDE.md already references fable discipline (skipped)"
+  else
+    [ -f "$CLAUDE_MD" ] || printf '# Global Instructions\n' > "$CLAUDE_MD"
+    cat >> "$CLAUDE_MD" <<'EOF'
+
+## Fable-class behavioral discipline
+
+- At session start, read `~/.claude/fable-emulation-prompt.md` and follow every section (all models, including Fable itself — explicit discipline stabilizes behavior).
+- Key rules: act once informed / do nothing beyond the task / when the user describes a problem or asks a question, the deliverable is your assessment (fix only when asked) / only report claims backed by tool results from this session / never end a turn on a promise ("I'll…") — do the work now / lead reports with the outcome, in complete sentences.
+- When delegating quality-critical work to Sonnet-class subagents, include the fable-mode skill reference or the key rules above in the subagent prompt.
+EOF
+    echo "  appended fable section -> ~/.claude/CLAUDE.md"
+  fi
 fi
 
 if $DO_CODEX; then
