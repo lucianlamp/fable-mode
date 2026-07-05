@@ -22,16 +22,29 @@ fable-mode/
 
 ## Install
 
+One-liner (installs both Claude Code and Codex CLI integration, idempotent):
+
 ```bash
-# Place the prompt and skill
+git clone https://github.com/lucianlamp/fable-mode && cd fable-mode && ./install.sh
+```
+
+Options: `./install.sh --claude-only` or `./install.sh --codex-only`.
+
+<details>
+<summary>Manual install</summary>
+
+```bash
+# Claude Code: prompt + skill
 cp prompts/fable-emulation-prompt.md ~/.claude/
 mkdir -p ~/.claude/skills/fable-mode
 cp skills/fable-mode/SKILL.md ~/.claude/skills/fable-mode/
 
-# Place the launchers somewhere on PATH
+# Launchers, somewhere on PATH
 cp bin/claude-fable bin/claude-fable.cmd ~/.local/bin/
 chmod +x ~/.local/bin/claude-fable
 ```
+
+</details>
 
 ## Usage
 
@@ -48,12 +61,7 @@ Or as a skill inside a session:
 
 ### Codex CLI
 
-```bash
-# Place the Codex edition and reference it from global AGENTS.md
-cp prompts/fable-emulation-codex.md ~/.codex/fable-emulation-prompt.md
-```
-
-Then add a section to `~/.codex/AGENTS.md` instructing Codex to read `~/.codex/fable-emulation-prompt.md` at session start. The Codex edition routes delegation and verification through the `codex-dynamic-workflows` skill (work packets, approval gates, goal mode) instead of Claude Code subagents.
+`install.sh` copies the Codex edition to `~/.codex/fable-emulation-prompt.md` and appends a section to `~/.codex/AGENTS.md` that instructs Codex to read it at session start (skipped if already present). The Codex edition routes delegation and verification through the `codex-dynamic-workflows` skill (work packets, approval gates, goal mode).
 
 ## Key behavioral rules
 
