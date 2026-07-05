@@ -51,6 +51,7 @@ if $DO_CLAUDE; then
 - Key rules: act once informed / do nothing beyond the task / when the user describes a problem or asks a question, the deliverable is your assessment (fix only when asked) / only report claims backed by tool results from this session / never end a turn on a promise ("I'll…") — do the work now / lead reports with the outcome, in complete sentences.
 - When delegating quality-critical work to Sonnet-class subagents, include the fable-mode skill reference or the key rules above in the subagent prompt.
 - Precedence: user instructions > process skills (e.g. Superpowers) > this discipline. When a process skill mandates a pre-phase, do that first; this discipline governs behavior within each phase.
+- During autonomous runs, when you hit an operation that needs approval, don't stop: record it, skip it, and continue with work that needs no approval. Report the pending-approval list when everything else is done or blocked.
 EOF
     echo "  appended fable section -> ~/.claude/CLAUDE.md"
   fi
@@ -77,6 +78,7 @@ if $DO_CODEX; then
 - Key rules: act once informed / do nothing beyond the task / when the user describes a problem or asks a question, the deliverable is your assessment (fix only when asked) / only report claims backed by tool results from this session / never end a turn on a promise ("I'll…") — do the work now / lead reports with the outcome, in complete sentences.
 - For tasks large enough to need orchestrated delegation and verification, follow the `codex-dynamic-workflows` skill's decision rule and use work packets, approval gates, and goal mode.
 - Precedence: user instructions > other AGENTS.md sections and process skills (Superpowers, codex-dynamic-workflows) > this discipline. When a process skill mandates a pre-phase, do that first; this discipline governs behavior within each phase.
+- During autonomous runs, when you hit an approval gate, don't stop: record it, skip it, and continue with work that needs no approval. Report the pending-approval list when everything else is done or blocked. For Git, the ceiling is commit / push / PR creation on a feature branch; merges and destructive operations go on the pending-approval list.
 EOF
     echo "  appended fable section -> ~/.codex/AGENTS.md"
   fi
