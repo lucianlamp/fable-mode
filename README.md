@@ -59,6 +59,10 @@ Or as a skill inside a session:
 /fable-mode
 ```
 
+### Always-on via CLAUDE.md (recommended)
+
+Add a section to `~/.claude/CLAUDE.md` instructing Claude to read `~/.claude/fable-emulation-prompt.md` at session start. This applies the discipline to every session — including Fable itself: the instruction set originates from the official Fable 5 prompting guide, so making it explicit stabilizes Fable's own behavior too. Also include the key rules in subagent prompts when delegating quality-critical work to Sonnet-class models.
+
 ### Codex CLI
 
 `install.sh` copies the Codex edition to `~/.codex/fable-emulation-prompt.md` and appends a section to `~/.codex/AGENTS.md` that instructs Codex to read it at session start (skipped if already present). The Codex edition routes delegation and verification through the `codex-dynamic-workflows` skill (work packets, approval gates, goal mode).
