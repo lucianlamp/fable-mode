@@ -29,6 +29,8 @@ Key rules (summary):
 - **Evidence-based reporting**: Only report claims backed by tool results
 - **Checkpoints**: Stop only for destructive actions, scope changes, or user-only input
 - **Reporting style**: Outcome first, complete sentences, no arrow chains
+- **Review mode**: When explicitly asked to review, escalate structural issues freely (spaghetti growth, ~1k-line sprawl, unneeded abstractions, missed code-judo simplifications) — but still report, don't rewrite. For deep audits, use the `thermo-nuclear-code-quality-review` skill if available
+- **Self-verification quality bar**: Check your own diff for ad-hoc conditionals, thin wrappers, and file sprawl before reporting done
 
 ## Compensating for the capability gap (when running on Sonnet or below)
 
