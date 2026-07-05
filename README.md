@@ -80,6 +80,16 @@ Or as a skill inside a session:
 
 See section 6 of [docs/claude-fable-5-analysis.md](docs/claude-fable-5-analysis.md) for details.
 
+## Autonomous-run integration
+
+The discipline is designed to coexist with loop engineering (Ralph loops, `/loop`, goal mode, long agentic runs). Three rules make this work — the installer injects them into `CLAUDE.md` / `AGENTS.md`:
+
+- **Precedence**: user instructions > process skills (Superpowers, codex-dynamic-workflows) > this discipline. A mandated pre-phase (brainstorming, TDD) runs first; the discipline governs behavior within each phase.
+- **Approval gates don't stall the loop**: during autonomous runs, an operation that needs approval is recorded and skipped, and work continues on everything that doesn't. The pending-approval list is reported when everything else is done or blocked — safety is unchanged (nothing unapproved executes), but the loop never idles.
+- **Git ceiling**: autonomous runs go as far as commit / push / PR creation on a feature branch. Merges and destructive operations (force push, hard reset, branch deletion) always wait for the user. The morning-after workflow is: review the queued PRs, merge what you approve.
+
+One companion change worth making in your own global config: if you have a rule like "present next-step options when work completes," scope it to interactive sessions only — otherwise each loop iteration ends with a menu nobody reads and the run stalls.
+
 ## Verification
 
 That `--append-system-prompt-file` actually reaches the model was confirmed with a sentinel test:
