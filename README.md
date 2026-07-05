@@ -11,7 +11,8 @@ fable-mode/
 ├── docs/
 │   └── claude-fable-5-analysis.md   # Analysis of what makes Fable 5 smart (with sources)
 ├── prompts/
-│   └── fable-emulation-prompt.md    # The system prompt (10 behavioral rule blocks)
+│   ├── fable-emulation-prompt.md    # The system prompt (10 behavioral rule blocks)
+│   └── fable-emulation-codex.md     # Codex CLI edition (delegation/verification wired to codex-dynamic-workflows)
 ├── skills/
 │   └── fable-mode/SKILL.md          # Claude Code skill version (behavior loop + gap-compensation table)
 └── bin/
@@ -44,6 +45,15 @@ Or as a skill inside a session:
 ```
 /fable-mode
 ```
+
+### Codex CLI
+
+```bash
+# Place the Codex edition and reference it from global AGENTS.md
+cp prompts/fable-emulation-codex.md ~/.codex/fable-emulation-prompt.md
+```
+
+Then add a section to `~/.codex/AGENTS.md` instructing Codex to read `~/.codex/fable-emulation-prompt.md` at session start. The Codex edition routes delegation and verification through the `codex-dynamic-workflows` skill (work packets, approval gates, goal mode) instead of Claude Code subagents.
 
 ## Key behavioral rules
 
