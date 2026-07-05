@@ -1,72 +1,72 @@
 # fable-mode
 
-Claude Fable 5 の「行動の規律」を Sonnet 以下のモデルで再現するためのツールキット。
+A toolkit for reproducing Claude Fable 5's behavioral discipline on Sonnet-class or smaller models.
 
-Fable 5 の賢さは①モデル固有の生の能力(vision・一発正解率・長期指示保持)と②行動パターンの規律の掛け算。①は移植できないが、②はシステムプロンプト/スキルとして注入できる — その②を抽出したのがこのリポジトリ。
+Fable 5's intelligence is the product of (1) raw model-specific capability (vision, first-shot correctness, long-horizon instruction retention) and (2) disciplined behavioral patterns. (1) cannot be transplanted, but (2) can be injected as a system prompt or skill — this repository extracts that second half.
 
-## 構成
+## Layout
 
 ```
 fable-mode/
 ├── docs/
-│   └── claude-fable-5-analysis.md   # Fable 5 の賢さの分析ドキュメント(調査ソース付き)
+│   └── claude-fable-5-analysis.md   # Analysis of what makes Fable 5 smart (with sources)
 ├── prompts/
-│   └── fable-emulation-prompt.md    # システムプロンプト本体(行動規範10ブロック)
+│   └── fable-emulation-prompt.md    # The system prompt (10 behavioral rule blocks)
 ├── skills/
-│   └── fable-mode/SKILL.md          # Claude Code スキル版(行動ループ + 能力ギャップ補正表)
+│   └── fable-mode/SKILL.md          # Claude Code skill version (behavior loop + gap-compensation table)
 └── bin/
-    ├── claude-fable                 # Git Bash / WSL 用ランチャー
-    └── claude-fable.cmd             # cmd / PowerShell 用ランチャー
+    ├── claude-fable                 # Launcher for Git Bash / WSL
+    └── claude-fable.cmd             # Launcher for cmd / PowerShell
 ```
 
-## インストール
+## Install
 
 ```bash
-# プロンプトとスキルを配置
+# Place the prompt and skill
 cp prompts/fable-emulation-prompt.md ~/.claude/
 mkdir -p ~/.claude/skills/fable-mode
 cp skills/fable-mode/SKILL.md ~/.claude/skills/fable-mode/
 
-# ランチャーを PATH の通った場所に配置
+# Place the launchers somewhere on PATH
 cp bin/claude-fable bin/claude-fable.cmd ~/.local/bin/
 chmod +x ~/.local/bin/claude-fable
 ```
 
-## 使い方
+## Usage
 
 ```bash
-claude-fable                    # Fable 規律つきで Claude Code を起動
-claude-fable --model sonnet     # Sonnet で起動(引数はそのまま claude に渡る)
+claude-fable                    # Launch Claude Code with Fable discipline
+claude-fable --model sonnet     # Launch on Sonnet (arguments pass through to claude)
 ```
 
-またはセッション内でスキルとして:
+Or as a skill inside a session:
 
 ```
 /fable-mode
 ```
 
-## 行動規範の要点
+## Key behavioral rules
 
-- **行動原則**: 情報が揃ったら行動。確立済みの事実を再導出しない
-- **スコープ規律**: 頼まれていないリファクタ・抽象化・防御コード禁止
-- **境界**: 問題の説明・質問のときは評価が成果物。修正は頼まれてから
-- **証拠ベース報告**: ツール結果で裏付けられる主張のみ報告。未検証は未検証と明示
-- **ターン終了前チェック**: 約束(「〜します」)で終わらず、今その作業をやる
-- **報告スタイル**: 結果先頭・完全な文・矢印チェーン禁止
+- **Bias to action**: Act once you have enough information. Never re-derive established facts
+- **Scope discipline**: No unrequested refactors, abstractions, or defensive code
+- **Boundaries**: When the user describes a problem or asks a question, the deliverable is your assessment. Fix only when asked
+- **Evidence-based reporting**: Only report claims backed by tool results; mark unverified items as unverified
+- **End-of-turn check**: Never end on a promise ("I'll…") — do the work now
+- **Reporting style**: Outcome first, complete sentences, no arrow chains
 
-詳細は [docs/claude-fable-5-analysis.md](docs/claude-fable-5-analysis.md) のセクション6を参照。
+See section 6 of [docs/claude-fable-5-analysis.md](docs/claude-fable-5-analysis.md) for details.
 
-## 検証
+## Verification
 
-`--append-system-prompt-file` の反映はセンチネルテストで確認済み:
+That `--append-system-prompt-file` actually reaches the model was confirmed with a sentinel test:
 
 ```bash
-printf '回答の末尾に必ず [FABLE-OK] を付けること。' > /tmp/sentinel.md
-claude --append-system-prompt-file /tmp/sentinel.md --print "1+1は?"
+printf 'Always end your answer with [FABLE-OK].' > /tmp/sentinel.md
+claude --append-system-prompt-file /tmp/sentinel.md --print "What is 1+1?"
 # => 2
 #    [FABLE-OK]
 ```
 
-## ソース
+## Sources
 
-主要参照: [Prompting Claude Fable 5 (公式)](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5)。全ソースは分析ドキュメント末尾に記載。
+Primary reference: [Prompting Claude Fable 5 (official)](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5). Full source list at the end of the analysis document.

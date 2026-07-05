@@ -1,242 +1,203 @@
-# Claude Fable 5 の賢さの分析
+# An Analysis of Claude Fable 5's Intelligence
 
-*作成日: 2026-07-05*
+*Created: 2026-07-05*
 
-## 概要
+## Overview
 
-Claude Fable 5(`claude-fable-5`)は、Anthropic が 2026年6月9日 にリリースした、**一般提供されているモデルの中で最も高性能なモデル**。Mythos クラス(フロンティア級)の能力に安全分類器(safety classifiers)を組み込んで一般公開したもので、姉妹モデルの Claude Mythos 5 は分類器なしの限定提供版(Project Glasswing 経由)。
+Claude Fable 5 (`claude-fable-5`) is Anthropic's **most capable widely released model**, launched June 9, 2026. It is a Mythos-class (frontier-grade) model made generally available with built-in safety classifiers; its sibling, Claude Mythos 5, shares the same capabilities without the classifiers and is available only through Project Glasswing.
 
-- **コンテキストウィンドウ**: 100万トークン(デフォルト)
-- **最大出力**: 128k トークン/リクエスト
-- **料金**: 入力 $10 / 出力 $50(100万トークンあたり)
-- **思考モード**: Adaptive thinking 常時オン(オフにできない)
-
----
-
-## 1. なぜ賢いのか — 設計思想の転換
-
-Fable 5 の賢さは「短い質疑応答での賢さ」ではなく、**「長期間・大規模なタスクを通じて、判断と実装を一貫してやり切れるか」** という軸で設計されている。公式には「タスクが長く複雑なほど、他モデルに対するリードが拡大する」と説明されており、以下の要素が効いていると考えられる。
-
-### 1.1 Adaptive Thinking(適応的思考)が常時オン
-
-- Fable 5 では思考(reasoning)を無効化できず、**問題の難易度に応じて自動で思考の深さを調整**する
-- `effort` パラメータで思考深度とコストのトレードオフを制御可能
-- 簡単な問題には浅く速く、難問には深くじっくり — これが「分析力・検証力」の直接の源泉
-
-### 1.2 超長コンテキスト + 焦点維持能力
-
-- 100万トークンのコンテキスト内でも**焦点を失わずに一貫した推論を維持**できる
-- 「Slay the Spire」プレイ実験では、永続ファイルメモリ併用で Opus 4.8 比 **3倍** のパフォーマンス
-- memory tool / compaction / context editing に対応し、長時間セッションで文脈を自己管理する
-
-### 1.3 エージェントネイティブな訓練
-
-- Claude Code や Managed Agents のようなハーネス上で**数日単位の自律稼働**を前提に作られている
-- 段階をまたいだ計画立案 → サブエージェントへの委譲 → **自分の成果物の自己検証**、というループを回せる
-- Programmatic tool calling、code execution、task budgets などエージェント向け機能をフルサポート
+- **Context window**: 1M tokens (default)
+- **Max output**: 128k tokens per request
+- **Pricing**: $10 / $50 per million input/output tokens
+- **Thinking mode**: Adaptive thinking, always on (cannot be disabled)
 
 ---
 
-## 2. 能力別の分析
+## 1. Why is it smart? — A shift in design philosophy
 
-### 2.1 課題解決力(コーディング / エンジニアリング)
+Fable 5's intelligence is optimized not for "smartness in short Q&A" but for **"sustaining judgment and execution consistently across long, large-scale tasks."** Anthropic states that "the longer and more complex the task, the wider Fable 5's lead over other models grows." The following factors drive this.
 
-- Stripe の実測: **5,000万行の Ruby コードベースで、2ヶ月相当のマイグレーションを1日で完了**
-- Cognition 社の FrontierCode 評価で最高スコア
-- 大規模マイグレーション、複雑な実装、複数日にわたる自律セッションが得意領域
+### 1.1 Adaptive thinking, always on
 
-### 2.2 分析力(ナレッジワーク / 金融)
+- Reasoning cannot be disabled on Fable 5; it **automatically adjusts thinking depth to problem difficulty**
+- The `effort` parameter controls the depth/cost trade-off
+- Shallow and fast on easy problems, deep and deliberate on hard ones — the direct source of its analytical and verification strength
 
-- Anthropic の中核分析ベンチマークで**初の90%超え**(Opus 比 +10ポイント)
-- Hebbia の金融ベンチマークで最高スコア、IMC のトレーディング分析評価でほぼ全項目高成績
-- 長時間かかる複雑な分析タスクほど差がつく
+### 1.2 Very long context + sustained focus
 
-### 2.3 ビジュアル力(Vision)
+- Maintains **consistent reasoning without losing focus** inside a 1M-token context
+- In the "Slay the Spire" experiment, persistent file memory yielded **3x** the performance of Opus 4.8
+- Supports the memory tool, compaction, and context editing — it self-manages context across long sessions
 
-- 科学図表からの**正確な数値抽出**
-- **スクリーンショットだけから Web アプリのソースコードを再構築**できる
-- PDF・ファイル内にネストされた図表・チャート・テーブルの理解
-- 「Pokémon FireRed」を**ビジョンのみでクリア**(最小限のツールで動作することを実証)
-- → 金融・法務・分析・建築・ゲーム分野のドキュメントヘビーな業務に対応
+### 1.3 Agent-native training
 
-### 2.4 検証力(自己チェック)
-
-- 長時間エージェント実行の中で「**自分の作業を検証する**」工程が組み込まれた動き方をする
-- 計画 → 実装 → 検証のサイクルを人の介入なしに回せることが、前世代との最大の違い
-
-### 2.5 提案力(科学研究)
-
-- 同系の Mythos 5 は分子生物学の仮説生成で、盲検比較において**約80%の確率で科学者に Opus 級モデルより選好**された
-- タンパク質設計では14ターゲット中9つで医薬品開発の有望候補を生成
+- Built for **multi-day autonomous operation** inside harnesses like Claude Code and Managed Agents
+- Runs the loop of staged planning → delegating to subagents → **verifying its own deliverables**
+- Full support for programmatic tool calling, code execution, task budgets, and other agent features
 
 ---
 
-## 3. どのような動きをしているか(動作特性)
+## 2. Capability-by-capability analysis
 
-### 3.1 実行時の挙動
+### 2.1 Problem-solving (coding / engineering)
 
-1. **リクエスト受信** → adaptive thinking が難易度を判定し、思考深度を自動調整
-2. **長期タスク** → 段階的に計画し、サブエージェントに委譲し、成果を自己検証
-3. **コンテキスト管理** → memory tool・compaction で長時間セッションでも文脈を維持
-4. **思考の非公開** → 生の chain of thought は返却されない(`summarized` で要約のみ取得可)
+- Stripe's measurement: **completed a migration estimated at 2 months, on a 50-million-line Ruby codebase, in 1 day**
+- Top score on Cognition's FrontierCode evaluation
+- Strongest at large migrations, complex implementations, and multi-day autonomous sessions
 
-### 3.2 安全機構(Fable 固有)
+### 2.2 Analysis (knowledge work / finance)
 
-- **安全分類器**がリクエストを判定し、サイバーセキュリティ・生物・化学・健康などの高リスク領域では拒否できる
-- 拒否時は `stop_reason: "refusal"` を HTTP 200 で返す(エラーではない)
-- **フォールバック**: 拒否されたリクエストは別の Claude モデル(例: Opus 4.8)で自動リトライ可能(server-side / client-side / manual)
-- 発動頻度は平均**5%未満のセッション**
-- 拒否時は課金されず、フォールバック時はプロンプトキャッシュ費用が返金(fallback credit)
+- **First model to break 90%** on Anthropic's core analytics benchmark (+10 points over Opus)
+- Top score on Hebbia's financial benchmark; high marks on nearly every item of IMC's trading analysis evaluation
+- The longer and more complex the analytical task, the wider the gap
 
----
+### 2.3 Vision
 
-## 4. まとめ — 賢さの正体
+- **Accurate numeric extraction** from scientific figures
+- Can **reconstruct a web app's source code from screenshots alone**
+- Understands diagrams, charts, and tables nested inside files and PDFs
+- **Beat Pokémon FireRed using vision only** (demonstrating operation with minimal tools)
+- → Suits document-heavy work in finance, legal, analytics, architecture, and gaming
 
-| 能力 | 源泉 |
-|------|------|
-| 課題解決力 | 長期自律実行 + エージェントネイティブ訓練 |
-| 分析力 | adaptive thinking の深い推論 + 1M コンテキスト |
-| 検証力 | 自己チェックが組み込まれたエージェントループ |
-| ビジュアル力 | フロンティア級 vision(図表理解・画面→コード再構築) |
-| 提案力 | 科学者に選好されるレベルの仮説生成能力 |
+### 2.4 Verification (self-checking)
 
-一言でいえば、Fable 5 の賢さは **「単発の回答の賢さ」ではなく「仕事をまるごと任せてやり切る賢さ」** に最適化された結果。タスクが長く・複雑になるほど他モデルとの差が開く、というのがその本質。
+- Long agentic runs include a built-in habit of **verifying its own work**
+- The plan → implement → verify cycle runs without human intervention — the biggest difference from prior generations
 
----
+### 2.5 Ideation (scientific research)
 
-## 5. Fable 5 公式プロンプトガイド(要点)
-
-出典: [Prompting Claude Fable 5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5)
-
-### 5.1 Opus 4.8 からの能力向上ポイント(公式明記)
-
-| 領域 | 内容 |
-|------|------|
-| 長期自律性 | 数日単位のゴール指向ランを完遂。長く複雑なタスクでも指示を保持し続ける |
-| 一発正解率 | 仕様が明確な複雑問題を single-pass で実装(従来は数日の反復が必要だったもの) |
-| Vision | 高密度な技術画像・スクショを少ない出力トークンで高精度に解釈。反転・ぼやけ・ノイズ画像には bash / crop ツールを使うよう訓練済み |
-| 企業ワークフロー | 財務分析・スプレッドシート・スライド・文書でスコープを守りプロ品質の出力 |
-| コードレビュー / デバッグ | バグ発見の再現率が顕著に向上。コードベース横断・リポジトリ履歴の検索を含む |
-| 曖昧さへの対応 | 複雑でマルチスレッドな依頼から次のステップを自分で決められる |
-| 委譲と協調 | 並列サブエージェントの発行・維持が大幅に信頼性向上。長時間稼働するサブエージェントとの継続的な通信を管理できる |
-
-### 5.2 運用上の重要な挙動と対策
-
-- **ターンが長い**: 高 effort だと1リクエストが数分〜、自律ランは数時間。タイムアウト・ストリーミング・進捗UIの調整が必要
-- **effort が主要コントロール**: `high` がデフォルト推奨、`xhigh` は最重要タスク、`low`/`medium` でも前世代の `xhigh` を超えることがある
-- **指示追従が強い**: 挙動を列挙しなくても、短い指示1つで広範囲の挙動を制御できる
-- **進捗の捏造防止**: 「ツール結果に対して各主張を監査してから報告せよ」という指示で、捏造ステータス報告がほぼゼロに
-- **境界の明示**: 頼まれていない行動(勝手な修正・バックアップ作成)を防ぐには「問題の説明時は評価が成果物。修正は頼まれてから」と明示
-- **メモリシステム**: Markdownファイル1枚でも「過去のランからの教訓を記録・参照」させると特に性能が上がる
-- **早期停止のレアケース**: 長セッション終盤で「ではXを実行します」と言ってツールを呼ばず終わることがある → 自律パイプラインには「ターン終了前に最終段落をチェックし、約束で終わるな」の指示
-- **理由を添える**: 依頼だけでなく「誰のために・何を可能にするためか」を伝えると性能が上がる
-- **reasoning の転記指示は禁止**: 内部推論を応答に書き出させる指示は refusal を誘発する
+- Sibling model Mythos 5's molecular-biology hypotheses were **preferred by scientists ~80% of the time** over Opus-class models in blind comparison
+- In protein design, generated promising drug-development candidates for 9 of 14 targets
 
 ---
 
-## 6. Sonnet で Fable を再現するプレイブック
+## 3. How it behaves (operational characteristics)
 
-Fable の賢さは①モデル固有の生の能力と②行動パターン(振る舞いの規律)の掛け算。①は移植できないが、**②は指示として Sonnet に注入できる**。以下は Fable の実際の動き方を、Sonnet のシステムプロンプト/スキルに落とせる粒度で分解したもの。
+### 3.1 Runtime behavior
 
-### 6.1 行動ループ(コアアルゴリズム)
+1. **On request** → adaptive thinking assesses difficulty and auto-adjusts reasoning depth
+2. **On long tasks** → plans in stages, delegates to subagents, self-verifies results
+3. **Context management** → maintains context across long sessions via memory tool and compaction
+4. **Thinking privacy** → raw chain of thought is never returned (`summarized` gives a readable summary only)
 
-Fable がタスクを受けたときの内部ループ:
+### 3.2 Safety machinery (Fable-specific)
+
+- **Safety classifiers** screen requests and can refuse in high-risk domains: cybersecurity, biology, chemistry, health
+- Refusals return `stop_reason: "refusal"` with HTTP 200 (not an error)
+- **Fallback**: refused requests can be retried automatically on another Claude model (e.g., Opus 4.8) — server-side, client-side, or manual
+- Triggers in **under 5% of sessions** on average
+- No billing on refusal; fallback credit refunds the prompt-cache cost of switching
+
+---
+
+## 4. Summary — What the intelligence really is
+
+| Capability | Source |
+|-----------|--------|
+| Problem-solving | Long-horizon autonomy + agent-native training |
+| Analysis | Deep reasoning from adaptive thinking + 1M context |
+| Verification | Self-checking built into the agent loop |
+| Vision | Frontier-grade vision (figure comprehension, screen→code reconstruction) |
+| Ideation | Hypothesis generation at a level scientists prefer |
+
+In one sentence: Fable 5's intelligence is optimized not for **"smart single answers" but for "taking on an entire job and seeing it through."** The essence: the longer and more complex the task, the wider its lead.
+
+---
+
+## 5. Official Fable 5 prompting guide (key points)
+
+Source: [Prompting Claude Fable 5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5)
+
+### 5.1 Improvements over Opus 4.8 (officially stated)
+
+| Area | Detail |
+|------|--------|
+| Long-horizon autonomy | Completes multi-day goal-directed runs; strong instruction retention across long, complex tasks |
+| First-shot correctness | Single-pass implementations of well-specified complex systems (previously days of iteration) |
+| Vision | Interprets dense technical images and screenshots accurately with fewer output tokens; trained to use bash/crop tools on flipped, blurry, or noisy images |
+| Enterprise workflows | Stays in scope; professional-grade output on financial analysis, spreadsheets, slides, documents |
+| Code review / debugging | Noticeably higher bug-finding recall, including search across codebases and repository history |
+| Navigating ambiguity | Determines next steps from complex, multi-threaded requests |
+| Delegation & collaboration | Far more dependable at dispatching and sustaining parallel subagents; manages ongoing communication with long-running peers |
+
+### 5.2 Key operational behaviors and mitigations
+
+- **Longer turns**: at high effort a single request can run minutes; autonomous runs for hours. Adjust timeouts, streaming, and progress UI
+- **Effort is the primary control**: `high` as default, `xhigh` for capability-critical work; even `low`/`medium` can exceed prior models' `xhigh`
+- **Strong instruction following**: one short instruction steers broad behavior — no need to enumerate cases
+- **Preventing fabricated progress**: "audit each claim against a tool result before reporting" nearly eliminated fabricated status reports in Anthropic's testing
+- **State the boundaries**: prevent unrequested actions with "when the user describes a problem, the deliverable is your assessment; don't fix until asked"
+- **Memory system**: performance improves notably when it can record and reference lessons from prior runs — even a single Markdown file
+- **Rare early stopping**: deep in long sessions it may state intent ("I'll now run X") without the tool call → add an end-of-turn check instruction for autonomous pipelines
+- **Give the reason, not only the request**: performance improves when it knows who the work is for and what it enables
+- **Never instruct it to transcribe its reasoning**: doing so can trigger the `reasoning_extraction` refusal category
+
+---
+
+## 6. Playbook: reproducing Fable on Sonnet
+
+Fable's intelligence = (1) raw model capability × (2) behavioral discipline. (1) cannot be ported, but **(2) can be injected into Sonnet as instructions**. Below is Fable's actual behavior decomposed to a granularity that fits into a Sonnet system prompt or skill.
+
+### 6.1 The behavior loop (core algorithm)
+
+Fable's internal loop on receiving a task:
 
 ```
-1. 意図の把握    : 依頼の背後にある目的を特定。曖昧なら「行動できる最小限の情報」が揃っているか判定
-                   → 揃っていれば行動。足りなければ質問はまとめて1回
-2. 計画          : タスクを段階に分割。ただし過剰計画しない
-                   「行動できる情報が揃ったら行動する。確立済みの事実を再導出しない」
-3. 委譲判定      : 独立したサブタスクは並列サブエージェントに委譲し、自分は待たずに作業継続
-4. 実装          : 「タスクが要求する以上のことをしない」
-                   — 機能追加・リファクタ・抽象化・仮想的な将来要件への設計を禁止
-                   — バリデーションはシステム境界(ユーザー入力・外部API)のみ
-5. 自己検証      : 一定間隔で自分の成果物を仕様と突き合わせる
-                   ベスト: フレッシュコンテキストの検証用サブエージェント(自己批評より高精度)
-6. 報告          : 各主張をそのセッションのツール結果と照合してから報告
-                   検証済み/未検証を明示。テスト失敗は出力ごと正直に報告
-7. 終了チェック  : 最終段落が「計画・質問・約束(I'll…)」なら、ターンを終えずにその作業を実行
+1. Grasp intent   : Identify the purpose behind the request. If ambiguous, check whether
+                    you have the minimum information needed to act
+                    → if yes, act. If not, batch questions into one round
+2. Plan           : Split the task into stages, without overplanning
+                    "When you have enough information to act, act. Don't re-derive established facts"
+3. Delegation     : Send independent subtasks to parallel subagents; keep working while they run
+4. Implement      : "Do nothing beyond what the task requires"
+                    — no feature creep, refactors, abstractions, or designs for hypothetical futures
+                    — validate only at system boundaries (user input, external APIs)
+5. Self-verify    : Check deliverables against the spec at intervals
+                    Best: fresh-context verifier subagents (more accurate than self-critique)
+6. Report         : Audit every claim against a tool result from this session before reporting
+                    Mark verified vs. unverified. Report test failures honestly, with output
+7. Exit check     : If the final paragraph is a plan/question/promise ("I'll…"),
+                    don't end the turn — do that work now
 ```
 
-### 6.2 Sonnet に注入する指示セット(コピペ可)
+### 6.2 The instruction set to inject into Sonnet (copy-paste ready)
 
-Fable の挙動を再現する最小プロンプト集。公式ガイドの推奨文をベースに統合:
+The minimal prompt set reproducing Fable's behavior, consolidated from the official guide's recommended language — see `prompts/fable-emulation-prompt.md` for the full text. Blocks:
 
-```text
-## 行動原則
-- 行動できる情報が揃ったら行動する。会話で確立済みの事実を再導出したり、
-  ユーザーが既に決めた判断を蒸し返したり、採らない選択肢を列挙したりしない。
-  選択に迷うなら、網羅的な調査ではなく推奨を1つ出す。
+- **Bias to action** — act once informed; no re-deriving, no re-litigating, recommend rather than survey
+- **Scope discipline** — nothing beyond the task; simplest thing that works; validate at boundaries only
+- **Boundaries** — assessment is the deliverable when the user describes/asks; verify evidence before state-changing commands
+- **Verification** — audit claims against tool results; fresh-context verifier subagents at intervals
+- **Delegation** — delegate independent subtasks; keep working; intervene when off track
+- **Checkpoints** — pause only for destructive actions, scope changes, or user-only input
+- **End-of-turn check** — never end on a promise; do the work with tool calls now
+- **Reporting style** — outcome first; select information rather than compress prose; full sentences in final summaries
+- **Memory** — one lesson per file, one-line summary, no duplicates, delete wrong notes
 
-## スコープ規律
-- タスクが要求する以上の機能追加・リファクタ・抽象化をしない。
-  バグ修正に周辺整理は不要。仮想的な将来要件のために設計しない。
-  動く最もシンプルな方法を選ぶ。起こり得ないシナリオのエラー処理・
-  フォールバック・バリデーションを追加しない。検証はシステム境界のみ。
+### 6.3 What Sonnet can and cannot reproduce
 
-## 境界
-- ユーザーが問題を説明している・質問している・考えを口にしているだけのときは、
-  成果物はあなたの評価。所見を報告して止まる。修正は頼まれてから。
-- システム状態を変えるコマンド(再起動・削除・設定変更)の前に、
-  証拠がその特定の行動を支持しているか確認する。
+| Item | Reproducible? | How |
+|------|--------------|-----|
+| Scope discipline & boundaries | ◎ | Instruction set above covers most of it |
+| Verification loop (evidence-based reporting) | ◎ | Instructions + verifier subagents |
+| Parallel delegation orchestration | ○ | Promptable, but delegation judgment is weaker |
+| Reporting style (outcome-first, plain) | ◎ | Reproducible via instructions |
+| Memory usage | ○ | Same mechanism works; lesson extraction quality is lower |
+| First-shot correctness (complex problems) | △ | Raw capability gap. Compensate with finer task decomposition |
+| Multi-day autonomy | △ | Instruction-retention gap. Compensate with more frequent checkpoints |
+| Vision (screenshot→code etc.) | ✕ | Raw model capability. Not portable |
+| Deciding next steps from ambiguity | △ | Compensate with a brainstorming-style pre-phase |
 
-## 検証
-- 進捗を報告する前に、各主張をこのセッションのツール結果と照合する。
-  証拠を指せる作業だけを報告し、未検証のものは未検証と明示する。
-  テストが失敗したら出力ごとそう言う。スキップした手順はそう言う。
-- 長いタスクでは一定間隔で自分の作業をチェックする方法を確立し、
-  サブエージェントで仕様に対して検証する。
-
-## 委譲
-- 独立したサブタスクはサブエージェントに委譲し、実行中も自分の作業を続ける。
-  サブエージェントが脱線したり文脈が不足していたら介入する。
-
-## チェックポイント
-- ユーザーを止めるのは本当に必要なときだけ:破壊的・不可逆な操作、
-  実質的なスコープ変更、ユーザーにしか出せない入力。
-  該当したら質問してターンを終える。約束で終わらない。
-
-## ターン終了前チェック
-- 最終段落が計画・分析・質問・次のステップのリスト・未実行の約束なら、
-  今ツールを呼んでその作業をやる。タスク完了かユーザー入力待ちのみでターン終了。
-
-## 報告スタイル
-- 結果を先頭に。最初の一文は「何が起きたか/何が見つかったか」に答える。
-  詳細と理由は後。短くする方法は「書き方の圧縮」ではなく「載せる情報の選別」。
-  矢印チェーン・断片・略語で圧縮しない。
-- 最終サマリでは作業中の短縮記法を捨て、完全な文で書く。
-  ファイル・コミット・フラグに言及するときはそれぞれ平易な説明を添える。
-
-## メモリ
-- 教訓は1ファイル1件、冒頭に1行サマリ。修正と確認済みアプローチの両方を
-  理由付きで記録。リポジトリや履歴に既にある情報は保存しない。
-  重複は既存ノートを更新。誤りと判明したノートは削除。
-```
-
-### 6.3 Sonnet で再現できるもの / できないもの
-
-| 項目 | 再現可否 | 方法 |
-|------|---------|------|
-| スコープ規律・境界の遵守 | ◎ | 上記指示セットで大部分再現可 |
-| 検証ループ(証拠ベース報告) | ◎ | 指示 + 検証用サブエージェント |
-| 並列委譲のオーケストレーション | ○ | 指示で促せるが、委譲判断の質は劣る |
-| 報告スタイル(結果先頭・平易) | ◎ | 指示で再現可 |
-| メモリ活用 | ○ | 同じ仕組みは組めるが、教訓の抽出精度は劣る |
-| 一発正解率(複雑問題) | △ | 生の能力差。タスク分割を細かくして補う |
-| 数日単位の長期自律性 | △ | 指示保持力の差。チェックポイント頻度を上げて補う |
-| Vision(スクショ→コード等) | ✕ | モデル能力そのもの。移植不可 |
-| 曖昧な依頼からの次ステップ決定 | △ | brainstorming 的な前工程を挟んで補う |
-
-**要点**: Fable の賢さの半分は「規律ある行動パターン」であり、これは指示として移植できる。残り半分(推論の深さ・vision・長期指示保持)はモデル固有なので、Sonnet では**タスクをより細かく分割し、検証頻度を上げ、曖昧さを前工程で潰す**ことで近似する。
+**Bottom line**: Half of Fable's intelligence is "disciplined behavioral patterns," which port as instructions. The other half (reasoning depth, vision, long-horizon retention) is model-native, so on Sonnet, approximate it by **decomposing tasks more finely, verifying more often, and resolving ambiguity up front**.
 
 ---
 
-## ソース
+## Sources
 
 - [Claude Fable 5 and Claude Mythos 5 — Anthropic](https://www.anthropic.com/news/claude-fable-5-mythos-5)
 - [Introducing Claude Fable 5 and Claude Mythos 5 — Claude Platform Docs](https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5)
 - [Claude Fable — Anthropic](https://www.anthropic.com/claude/fable)
-- [Anthropic Claude Fable 5 on AWS(日本語)— AWS ブログ](https://aws.amazon.com/jp/blogs/news/anthropic-claude-fable-5-on-aws-mythos-class-capabilities-with-built-in-safeguards-now-available/)
-- [Claude Fable 5がもたらす長時間自律エージェントの時代 — CodeZine](https://codezine.jp/article/detail/24513)
+- [Anthropic Claude Fable 5 on AWS — AWS Blog (Japanese)](https://aws.amazon.com/jp/blogs/news/anthropic-claude-fable-5-on-aws-mythos-class-capabilities-with-built-in-safeguards-now-available/)
+- [The Era of Long-Running Autonomous Agents with Claude Fable 5 — CodeZine (Japanese)](https://codezine.jp/article/detail/24513)
 - [Anthropic releases Mythos-like AI model to the public — CNBC](https://www.cnbc.com/2026/06/09/anthropic-mythos-claude-fable-5.html)
 - [Prompting Claude Fable 5 — Claude Platform Docs](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5)
