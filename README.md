@@ -101,6 +101,14 @@ claude --append-system-prompt-file /tmp/sentinel.md --print "What is 1+1?"
 #    [FABLE-OK]
 ```
 
+## Attribution
+
+The instruction language is adapted from Anthropic's official [Prompting Claude Fable 5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5) guide. The review-mode standards are inspired by the [thermo-nuclear-code-quality-review](https://github.com/cursor/plugins/blob/main/cursor-team-kit/skills/thermo-nuclear-code-quality-review/SKILL.md) skill from Cursor's plugin kit.
+
+## License
+
+[MIT](LICENSE)
+
 ## Sources
 
 Primary reference: [Prompting Claude Fable 5 (official)](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5). Full source list at the end of the analysis document.
