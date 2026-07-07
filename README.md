@@ -53,6 +53,8 @@ claude-fable                    # Launch Claude Code with Fable discipline
 claude-fable --model sonnet     # Launch on Sonnet (arguments pass through to claude)
 ```
 
+**Note**: the launcher always passes `--dangerously-skip-permissions --remote-control` — it skips all permission prompts and enables remote control, for unattended/autonomous use. Don't run it against directories or credentials you wouldn't hand fully autonomous write access to. If you want the discipline without those flags, invoke `claude --append-system-prompt-file ~/.claude/fable-emulation-prompt.md` directly instead.
+
 Or as a skill inside a session:
 
 ```

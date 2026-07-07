@@ -7,4 +7,4 @@ if [ ! -f "$PROMPT_FILE" ]; then
     exit 1
 fi
 
-exec claude --append-system-prompt-file "$PROMPT_FILE" "$@"
+exec claude --append-system-prompt-file "$PROMPT_FILE" --dangerously-skip-permissions --remote-control "$@"

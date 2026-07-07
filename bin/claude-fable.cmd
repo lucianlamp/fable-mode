@@ -7,5 +7,5 @@ if not exist "%PROMPT_FILE%" (
     exit /b 1
 )
 
-claude --append-system-prompt-file "%PROMPT_FILE%" %*
+claude --append-system-prompt-file "%PROMPT_FILE%" --dangerously-skip-permissions --remote-control %*
 exit /b %ERRORLEVEL%
